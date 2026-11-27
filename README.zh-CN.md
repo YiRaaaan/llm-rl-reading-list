@@ -28,9 +28,11 @@
 | 2026-11-02 | [FireFlash：长程 agentic RL 开放配方](https://agenteconomics.org/posts/agentic-rl-recipe) | agenteconomics.org 博客（Wenbo Hu、Nanyun Peng、Dakuo Wang、Kai-Wei Chang 等） | 从 GLM-5.3-Flash 全参 RL，64 张 B300 不到 5 天：训推各占一半 GPU 全异步，rollout 用 FP8、最多落后 6 个版本，MTP 投机解码提速 1.38×；只留初始通过率 15–85% 的任务（零信号组 48%→10.2%），每个任务先过 9 道 grader 检查，部分分＋长度奖励；GRPO＋截断 IS＋score centering＋成功偏置，不加 KL 和熵。TB 4.0 从 35.8 到 46.2，每题成本 \$0.72（Fable 5 最高档为 \$22.02）。 |
 | 2026-10-24 | [Kimi K3.1 Pro 技术博客](https://www.kimi.ai/blog/kimi-k3-1-pro) | Moonshot AI | 数百个领域联合 RL，重做 RL 框架、沙箱和 rollout 调度，并建环境质检平台；TB 4.0 得 65.7%。没公开算法、奖励和算力。（日期取页面 dateModified；权重 11-04 放出） |
 | 2026-10-22 | [ThinkingBox：把数据库检查变成 RL 奖励](https://huggingface.co/blog/microsoft/thinkingbox-training) | Microsoft × Hugging Face | 507 个任务按最终 DB 状态打分；Qwen3.8-27B 训 50 步 GRPO，pass@1 从 51.70% 到 60.78%，pass@20 略降。 |
+| 2026-10-17 | [DeepSeek-V4.1-Flash-1017 发布](https://api-docs.deepseek.com/news/news261017/) | DeepSeek | 官方只说用带自我反馈的 RL 改进端到端项目开发（从游戏到 3D 建模）；称基准更强、完成更快、输出更短，并针对 DeepSeek Harness 优化；权重已在 Hugging Face 开源。没公开奖励设计和训练细节。 |
 | 2026-10-16 | [Welcome Beam（501B 开源模型）](https://huggingface.co/blog/reflection-beam) | Hugging Face × Reflection | Miles＋BF16 GRPO，截断 IS，不加 KL 和熵；AIME25 全参 46.25→55.8，LoRA 42.9→64.2。 |
 | 2026-10-15 | [Nemotron 3.5 Super VL 发布](https://x.com/kuchaev/status/2110750567081693405) | NVIDIA × Prime Intellect | 在 2,500 个 AutomationBench 企业任务上做 GRPO（查过捷径和泄露），AA 公开集约 +70；base、checkpoint、数据、配方、环境全部放出。 |
 | 2026-10-08 | [Post-training infrastructure at Proximal](https://www.proximal.ai/blog/posttraining-infra/) | Proximal | 基于 Miles 的 LoRA 异步训练：落后超过 3 个版本的样本丢弃（平均陈旧度约 1.7），按 KV 余量路由（缓存命中 99.6%），K8s＋gVisor 沙箱；DeepSWE pass@1 +8.4 到 37.2%。 |
+| 2026-10-08 | [MiMo-V2.6: Scaling Reinforcement Learning Towards Self-Improvement](https://arxiv.org/abs/2610.11959) | Xiaomi LLM-Core Team | 全模态 MiMo-V2.6 系列的 RL 扩展报告：异步训练每步 1,568 条样本、2.7–3.7B token，上下文最长 1M；环境覆盖代码、通用、视觉和网络安全，混用多种 agent harness；用分组 agentic 评分给长程任务更准的奖励，并引导更短的解法。冻结 MoE router，多层防 reward hacking；开源了训练曲线、RL 环境和 RL 框架。（arXiv v1） |
 | 2026-09-24 | [Rufus-Air: An Open LLM Post-Training Recipe](https://arxiv.org/abs/2609.29421) | Amazon | 从 GLM-4.5-Air-Base 出发的 8 阶段完整后训练配方。（arXiv v1） |
 | 2026-08-03 | [Qwen3.8-Max: A New Bar for Coding and Cowork](https://www.alibabacloud.com/blog/603421) | Qwen（阿里云社区博客） | Qwen3.8-Max 发布博客（2.4T 参数、95B 激活，称会开源权重）。“Work”部分讲真实工作 RL：环境沿任务（单任务→多任务→多天）、工作区（多文件→层级文件夹→异构文件夹）、harness（类别、版本、skills）三个方向解耦扩展；统一奖励系统把执行检查、对文本和渲染出的视觉产物做 rubric 判定、agentic 检查合在一起，rubric 可自动扩展；在线数据平衡器让每个 batch 在任务、难度、工作区、harness 上保持均衡，压低批间梯度方差。称在 QwenWork、Claude Code、Codex、OpenClaw、Hermes 上表现相当。 |
 
@@ -115,6 +117,7 @@
 | 2026-10-15 | [ReFlow](https://arxiv.org/abs/2610.21640) | HKU, USTC, Alibaba | 回放驱动的解耦式 RL，吞吐比同步和异步系统最高 2.06×。 |
 | 2026-10-09 | [S³R](https://arxiv.org/abs/2610.13202) |  | 自稀疏投机解码 rollout，采样分布不偏；端到端 1.35–1.39×。 |
 | 2026-09-19 | [FlashREINFORCE（v2 于 2026-11-18）](https://arxiv.org/abs/2611.18627) | NVIDIA | 不用 critic、每个 prompt 一条 rollout 的异步 agent RL；1.5B 比 GRPO 高 1.7 且 rollout 减半，30B-A3B 在 policy lag 为 8 时仍稳定。 |
+| 2026-09-19 | [DeepSeek Elastic Compute (DSec)](https://arxiv.org/abs/2609.22978) | DeepSeek-AI | agentic 训练用的生产级沙箱平台：统一 SDK 覆盖 FnCall、容器、microVM 和完整 VM；与 RL 框架协同设计，把有状态的 rollout 执行和可抢占的 GPU 训练解耦，并处理 reward hacking 等 agent 越界行为。单个单元约 160 节点、每天约 300 万个沙箱，生产中超过 38 万个并发沙箱、每秒 5,000 多次创建。 |
 
 ### on-policy 蒸馏、合并与权重
 
