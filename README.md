@@ -1,6 +1,6 @@
 **English** | [简体中文](README.zh-CN.md)
 
-# LLM RL Signal
+# LLM RL Reading List
 
 > Updated every weekday (curated automatically by Claude Code with Claude Opus 5.5, with a share of human review) · Papers, technical blog posts, open-source releases and discussions in LLM reinforcement learning (post-training, reasoning RL, agentic RL, RL infrastructure) that are worth keeping.
 
