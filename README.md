@@ -48,6 +48,7 @@ LLM RL papers are numerous and uneven in quality, and few of us have the time or
 | 2026-10-13 | [Toward RL on mixed-precision, mixed-accelerator samplers](https://modal.com/blog/toward-rl-on-mixed-precision-mixed-accelerator-samplers) | Modal (Nan Jiang) | Samplers on 6 GPU types (NVFP4 on B200/B300, FP8 and BF16 on H100/H200, BF16 on A100/RTX PRO 6000) feed one B200 BF16 trainer, fully async with unbounded staleness; Qwen3.6-35B-A3B on 256K-context agentic coding. Uncorrected GRPO always collapses; MIS, SC or top-p alone only delays the collapse; SC + MIS (optionally with top-p mask replay) is stable. Training–inference KL is 4.7× that of homogeneous sampling, SWE-bench Pro V2 stays on par, and sampling costs about 15% less. Takeaway: stability depends on whether the mismatch keeps growing, not on its size. |
 | 2026-10-08 | [TRL v1.15.0](https://github.com/huggingface/trl/releases/tag/v1.15.0) | Hugging Face TRL | Fused LM head on by default, peak memory down 52–82% at 8k; GRPO max length 29k→115k; AsyncGRPO integrates OpenEnv. |
 | 2026-10-08 | [TermGrade](https://aiand.com/newsroom/termgrade) | ai& | 1,004 executable terminal RL environments + 36K graded trajectories + per-model pass rates; gemma-4-31B-it after GRPO: TB2.1 43.0→45.1; binary rewards beat per-test partial credit. |
+| 2025-08-05 | [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl) | Feng Yao, Liyuan Liu, et al. (blog) | In frameworks such as verl, rollout (vLLM) and training (FSDP) use different implementations, and the gap silently turns nominally on-policy RL into off-policy RL; proposes truncated importance sampling (TIS) as the fix, now a common option across frameworks. |
 
 ### Reward hacking and safety reports
 
@@ -61,6 +62,29 @@ LLM RL papers are numerous and uneven in quality, and few of us have the time or
 ## Papers
 
 All links point to arXiv abstract pages; titles and first-submission dates were checked against the arXiv API.
+
+### RLHF and preference optimization
+
+| Date | Paper | Affiliations / authors | Key points |
+|-|-|-|-|
+| 2023-05-31 | [Let's Verify Step by Step](https://arxiv.org/abs/2305.20050) | OpenAI | Compares outcome and process supervision: a process-supervised reward model (PRM) solves 78% of a representative MATH subset; releases PRM800K, 800K step-level human labels. |
+| 2023-05-29 | [Direct Preference Optimization (DPO)](https://arxiv.org/abs/2305.18290) | Stanford | Rewrites the KL-constrained RLHF objective as a classification loss on preference data, with no explicit reward model and no RL sampling; matches or beats PPO-style RLHF and spawned many variants. |
+| 2022-03-04 | [Training language models to follow instructions with human feedback (InstructGPT)](https://arxiv.org/abs/2203.02155) | OpenAI | Establishes the three-stage RLHF pipeline SFT → reward model → PPO; in human evaluations the 1.3B InstructGPT is preferred over the 175B GPT-3. |
+| 2017-07-20 | [Proximal Policy Optimization Algorithms (PPO)](https://arxiv.org/abs/1707.06347) | OpenAI | A clipped surrogate objective that allows several epochs of minibatch updates per batch; simpler than TRPO with better sample efficiency, and the base of most later policy-optimization methods for LLMs. |
+| 2017-06-12 | [Deep reinforcement learning from human preferences](https://arxiv.org/abs/1706.03741) | OpenAI, DeepMind | The starting point of RLHF: learn a reward model from human pairwise preferences over trajectory segments and optimize it with RL; learns complex behaviors on Atari and MuJoCo with feedback on under 1% of interactions. |
+
+### Reasoning RL (RLVR)
+
+| Date | Paper | Affiliations / authors | Key points |
+|-|-|-|-|
+| 2025-10-15 | [The Art of Scaling Reinforcement Learning Compute for LLMs (ScaleRL)](https://arxiv.org/abs/2510.13786) | Meta, UT Austin, et al. | A systematic study of more than 400K GPU-hours: fits RL scaling with sigmoidal compute–performance curves so large-scale results can be predicted from small runs; proposes the best-practice recipe ScaleRL and validates it in a single 100K-GPU-hour run. |
+| 2025-07-24 | [Group Sequence Policy Optimization (GSPO)](https://arxiv.org/abs/2507.18071) | Qwen Team, Alibaba | Defines the importance ratio at the sequence level and clips and optimizes per sequence instead of per token; more stable and efficient than GRPO, notably stabilizing MoE RL training, and used for Qwen3. |
+| 2025-04-18 | [Does Reinforcement Learning Really Incentivize Reasoning Capacity in LLMs Beyond the Base Model?](https://arxiv.org/abs/2504.13837) | Tsinghua, SJTU | Measures capability boundaries with pass@k at large k: RLVR improves sampling efficiency at small k, but the base model wins at large k and most reasoning paths of the RL model already exist in the base distribution; distillation is what brings in new capability. Sparked a large follow-up debate. |
+| 2025-03-18 | [DAPO: An Open-Source LLM Reinforcement Learning System at Scale](https://arxiv.org/abs/2503.14476) | ByteDance Seed, Tsinghua AIR, et al. | Introduces Clip-Higher, dynamic sampling, token-level policy-gradient loss and overlong reward shaping; Qwen2.5-32B reaches 50 on AIME 2024 with half the training steps of DeepSeek-R1-Zero-Qwen-32B; open-sourced on verl, and these tricks became near-default. |
+| 2025-01-22 | [DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948) | DeepSeek-AI | R1-Zero, trained with large-scale RL and no SFT, develops self-verification, reflection and long chains of thought; R1 adds cold-start data and multi-stage training to reach reasoning on par with OpenAI o1-1217; weights and several distilled small models are open. The starting point of the current wave of reasoning RL. |
+| 2025-01-22 | [Kimi k1.5: Scaling Reinforcement Learning with LLMs](https://arxiv.org/abs/2501.12599) | Moonshot AI (Kimi Team) | A long-CoT RL recipe released the same day as R1: scales the RL context to 128K with improved policy optimization, without MCTS, value functions or process reward models; long2short methods improve short-CoT performance; matches o1 on math and code. |
+| 2024-11-22 | [Tülu 3: Pushing Frontiers in Open Language Model Post-Training](https://arxiv.org/abs/2411.15124) | Ai2, UW | A fully open post-training recipe (SFT, DPO, RLVR) that coins the term RLVR, RL with verifiable rewards; data, code, training recipes and evaluations are all released. |
+| 2024-02-05 | [DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300) | DeepSeek-AI, Tsinghua, PKU | Introduces GRPO, which replaces the critic with the group-average reward as the baseline and saves the memory of a value model; the 7B math model scores 51.7% on MATH without tools or voting. |
 
 ### Credit assignment for long-horizon agents
 

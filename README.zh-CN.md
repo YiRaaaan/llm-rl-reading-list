@@ -48,6 +48,7 @@
 | 2026-10-13 | [Toward RL on mixed-precision, mixed-accelerator samplers](https://modal.com/blog/toward-rl-on-mixed-precision-mixed-accelerator-samplers) | Modal（Nan Jiang） | 采样跑在 6 种卡上（B200/B300 用 NVFP4，H100/H200 用 FP8 和 BF16，A100/RTX PRO 6000 用 BF16），喂给一个 B200 BF16 trainer，全异步、不限陈旧度；Qwen3.6-35B-A3B 做 256K 上下文 agentic coding。不加修正的 GRPO 必崩，单加 MIS、SC 或 top-p 只能推迟；SC＋MIS（可加 top-p mask replay）才稳定。训推 KL 是同构采样的 4.7 倍，SWE-bench Pro V2 仍持平，采样成本约低 15%。观点：稳定性取决于失配是否持续增长，而非大小。 |
 | 2026-10-08 | [TRL v1.15.0](https://github.com/huggingface/trl/releases/tag/v1.15.0) | Hugging Face TRL | fused LM head 默认开启，8k 下峰值显存降 52–82%，GRPO 最大长度 29k→115k；AsyncGRPO 接入 OpenEnv。 |
 | 2026-10-08 | [TermGrade](https://aiand.com/newsroom/termgrade) | ai& | 1,004 个可执行终端 RL 环境＋3.6 万条带打分轨迹＋逐模型通过率；gemma-4-31B-it GRPO 后 TB2.1 43.0→45.1；二元奖励好于按测试给部分分。 |
+| 2025-08-05 | [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl) | Feng Yao, Liyuan Liu 等（博客） | 在 verl 这类框架里，rollout（vLLM）和训练（FSDP）用不同实现，这种差异让名义上的 on-policy RL 实际变成 off-policy；提出截断重要性采样（TIS）来修正，后来成为各框架的常用选项。 |
 
 ### Reward hack 与安全报告
 
@@ -61,6 +62,29 @@
 ## 论文
 
 链接均为 arXiv 摘要页，标题和首发日期已用 arXiv API 逐篇核对。
+
+### RLHF 与偏好优化
+
+| 发布时间 | 论文 | 机构 / 作者 | 要点 |
+|-|-|-|-|
+| 2023-05-31 | [Let's Verify Step by Step](https://arxiv.org/abs/2305.20050) | OpenAI | 对比结果监督和过程监督：过程监督训练的奖励模型（PRM）在 MATH 代表性子集上解出 78% 的题；同时发布 80 万条步级人工标注 PRM800K。 |
+| 2023-05-29 | [Direct Preference Optimization (DPO)](https://arxiv.org/abs/2305.18290) | Stanford | 把带 KL 约束的 RLHF 目标改写成偏好数据上的分类损失，不需要显式奖励模型，也不需要 RL 采样；效果与 PPO 式 RLHF 相当或更好，此后出现大量变体。 |
+| 2022-03-04 | [Training language models to follow instructions with human feedback (InstructGPT)](https://arxiv.org/abs/2203.02155) | OpenAI | 确立 SFT → 奖励模型 → PPO 的三段式 RLHF；人工评估中 1.3B 的 InstructGPT 优于 175B 的 GPT-3。 |
+| 2017-07-20 | [Proximal Policy Optimization Algorithms (PPO)](https://arxiv.org/abs/1707.06347) | OpenAI | 用裁剪后的代理目标，让每批数据可以做多轮 minibatch 更新；比 TRPO 实现简单、样本效率更好，是后来 LLM 上各种策略优化算法的基底。 |
+| 2017-06-12 | [Deep reinforcement learning from human preferences](https://arxiv.org/abs/1706.03741) | OpenAI, DeepMind | RLHF 的起点：用人对轨迹片段的成对偏好训练奖励模型，再用 RL 优化；在 Atari 和 MuJoCo 上只需对不到 1% 的交互给反馈，就能学会复杂行为。 |
+
+### 推理 RL（RLVR）
+
+| 发布时间 | 论文 | 机构 / 作者 | 要点 |
+|-|-|-|-|
+| 2025-10-15 | [The Art of Scaling Reinforcement Learning Compute for LLMs (ScaleRL)](https://arxiv.org/abs/2510.13786) | Meta, UT Austin 等 | 超过 40 万 GPU 小时的系统研究：用 S 形的算力-性能曲线拟合 RL 扩展，能从小规模实验预测大规模结果；给出最佳实践配方 ScaleRL，并在单次 10 万 GPU 小时的训练中验证。 |
+| 2025-07-24 | [Group Sequence Policy Optimization (GSPO)](https://arxiv.org/abs/2507.18071) | Qwen Team, Alibaba | 在序列级定义重要性比率并做序列级裁剪和优化，而不是 token 级；比 GRPO 更稳定、更高效，尤其稳住了 MoE 的 RL 训练，已用于 Qwen3。 |
+| 2025-04-18 | [Does Reinforcement Learning Really Incentivize Reasoning Capacity in LLMs Beyond the Base Model?](https://arxiv.org/abs/2504.13837) | Tsinghua, SJTU | 用大 k 的 pass@k 衡量能力边界：RLVR 提高了小 k 时的采样效率，但 k 很大时基座模型反而更高，RL 模型的推理路径大多已在基座分布里；蒸馏才真正引入新能力。引出了大量后续讨论。 |
+| 2025-03-18 | [DAPO: An Open-Source LLM Reinforcement Learning System at Scale](https://arxiv.org/abs/2503.14476) | ByteDance Seed, Tsinghua AIR 等 | 提出 Clip-Higher、动态采样、token 级策略梯度损失、超长奖励塑形四项技术；Qwen2.5-32B 上 AIME 2024 得 50 分，训练步数只有 DeepSeek-R1-Zero-Qwen-32B 的一半；基于 verl 开源，后来几乎成了默认做法。 |
+| 2025-01-22 | [DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948) | DeepSeek-AI | R1-Zero 不经 SFT、只用大规模 RL，就涌现出自我验证、反思和长思维链；R1 加入冷启动数据和多阶段训练，推理能力与 OpenAI o1-1217 相当；模型开源并蒸馏出多个小模型。这一轮推理 RL 热潮的起点。 |
+| 2025-01-22 | [Kimi k1.5: Scaling Reinforcement Learning with LLMs](https://arxiv.org/abs/2501.12599) | Moonshot AI（Kimi Team） | 与 R1 同日发布的长思维链 RL 配方：把 RL 上下文扩到 128K、改进策略优化，不用 MCTS、价值函数和过程奖励模型；long2short 方法提升短思维链表现；数学和代码上追平 o1。 |
+| 2024-11-22 | [Tülu 3: Pushing Frontiers in Open Language Model Post-Training](https://arxiv.org/abs/2411.15124) | Ai2, UW | 完全开放的后训练配方（SFT、DPO、RLVR），提出 RLVR 这个说法，即用可验证奖励做 RL；数据、代码、训练配方和评测全部公开。 |
+| 2024-02-05 | [DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300) | DeepSeek-AI, Tsinghua, PKU | 提出 GRPO：用组内平均奖励做基线来代替 critic，省掉价值模型的显存；7B 数学模型在 MATH 上得 51.7%（不用工具和投票）。 |
 
 ### 长程 agent 的 credit assignment
 
