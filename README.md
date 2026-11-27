@@ -11,6 +11,7 @@ LLM RL papers are numerous and uneven in quality, and few of us have the time or
 ## How it is updated
 
 - **Daily digest**: every weekday, new arXiv papers (cs.CL / cs.LG / cs.AI), posts from major labs and personal blogs, new releases of open-source RL frameworks and discussions on X are collected into one digest under [`daily/`](daily/), named by date. Digests are written in Chinese.
+- **Coverage**: automated curation started in October 2026; works published before then were mostly added by hand.
 - **Curated list**: items worth keeping are moved from the digests into the three sections below (blogs and releases, papers, discussions on X), updated from time to time.
 - **Dates**: papers use the arXiv v1 submission date (UTC); blog posts use the date shown on the page; X posts use posting time (UTC); framework releases use the GitHub release date.
 - **Who**: the daily updates rely on Claude Opus 5.5 to search, select and write the digests; a share of the items is reviewed and edited by hand before entering the curated list. Summaries and numbers come from the original sources or abstracts and may contain mistakes. Issues and corrections are welcome.
