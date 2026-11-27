@@ -28,9 +28,11 @@
 | 2026-11-02 | [FireFlash：长程 agentic RL 开放配方](https://agenteconomics.org/posts/agentic-rl-recipe) | agenteconomics.org 博客（Wenbo Hu、Nanyun Peng、Dakuo Wang、Kai-Wei Chang 等） | 从 GLM-5.3-Flash 全参 RL，64 张 B300 不到 5 天：训推各占一半 GPU 全异步，rollout 用 FP8、最多落后 6 个版本，MTP 投机解码提速 1.38×；只留初始通过率 15–85% 的任务（零信号组 48%→10.2%），每个任务先过 9 道 grader 检查，部分分＋长度奖励；GRPO＋截断 IS＋score centering＋成功偏置，不加 KL 和熵。TB 4.0 从 35.8 到 46.2，每题成本 \$0.72（Fable 5 最高档为 \$22.02）。 |
 | 2026-10-24 | [Kimi K3.1 Pro 技术博客](https://www.kimi.ai/blog/kimi-k3-1-pro) | Moonshot AI | 数百个领域联合 RL，重做 RL 框架、沙箱和 rollout 调度，并建环境质检平台；TB 4.0 得 65.7%。没公开算法、奖励和算力。（日期取页面 dateModified；权重 11-04 放出） |
 | 2026-10-22 | [ThinkingBox：把数据库检查变成 RL 奖励](https://huggingface.co/blog/microsoft/thinkingbox-training) | Microsoft × Hugging Face | 507 个任务按最终 DB 状态打分；Qwen3.8-27B 训 50 步 GRPO，pass@1 从 51.70% 到 60.78%，pass@20 略降。 |
+| 2026-10-17 | [DeepSeek-V4.1-Flash-1017 发布](https://api-docs.deepseek.com/news/news261017/) | DeepSeek | 官方只说用带自我反馈的 RL 改进端到端项目开发（从游戏到 3D 建模）；称基准更强、完成更快、输出更短，并针对 DeepSeek Harness 优化；权重已在 Hugging Face 开源。没公开奖励设计和训练细节。 |
 | 2026-10-16 | [Welcome Beam（501B 开源模型）](https://huggingface.co/blog/reflection-beam) | Hugging Face × Reflection | Miles＋BF16 GRPO，截断 IS，不加 KL 和熵；AIME25 全参 46.25→55.8，LoRA 42.9→64.2。 |
 | 2026-10-15 | [Nemotron 3.5 Super VL 发布](https://x.com/kuchaev/status/2110750567081693405) | NVIDIA × Prime Intellect | 在 2,500 个 AutomationBench 企业任务上做 GRPO（查过捷径和泄露），AA 公开集约 +70；base、checkpoint、数据、配方、环境全部放出。 |
 | 2026-10-08 | [Post-training infrastructure at Proximal](https://www.proximal.ai/blog/posttraining-infra/) | Proximal | 基于 Miles 的 LoRA 异步训练：落后超过 3 个版本的样本丢弃（平均陈旧度约 1.7），按 KV 余量路由（缓存命中 99.6%），K8s＋gVisor 沙箱；DeepSWE pass@1 +8.4 到 37.2%。 |
+| 2026-10-08 | [MiMo-V2.6: Scaling Reinforcement Learning Towards Self-Improvement](https://arxiv.org/abs/2610.11959) | Xiaomi LLM-Core Team | 全模态 MiMo-V2.6 系列的 RL 扩展报告：异步训练每步 1,568 条样本、2.7–3.7B token，上下文最长 1M；环境覆盖代码、通用、视觉和网络安全，混用多种 agent harness；用分组 agentic 评分给长程任务更准的奖励，并引导更短的解法。冻结 MoE router，多层防 reward hacking；开源了训练曲线、RL 环境和 RL 框架。（arXiv v1） |
 | 2026-09-24 | [Rufus-Air: An Open LLM Post-Training Recipe](https://arxiv.org/abs/2609.29421) | Amazon | 从 GLM-4.5-Air-Base 出发的 8 阶段完整后训练配方。（arXiv v1） |
 | 2026-08-03 | [Qwen3.8-Max: A New Bar for Coding and Cowork](https://www.alibabacloud.com/blog/603421) | Qwen（阿里云社区博客） | Qwen3.8-Max 发布博客（2.4T 参数、95B 激活，称会开源权重）。“Work”部分讲真实工作 RL：环境沿任务（单任务→多任务→多天）、工作区（多文件→层级文件夹→异构文件夹）、harness（类别、版本、skills）三个方向解耦扩展；统一奖励系统把执行检查、对文本和渲染出的视觉产物做 rubric 判定、agentic 检查合在一起，rubric 可自动扩展；在线数据平衡器让每个 batch 在任务、难度、工作区、harness 上保持均衡，压低批间梯度方差。称在 QwenWork、Claude Code、Codex、OpenClaw、Hermes 上表现相当。 |
 
@@ -46,6 +48,7 @@
 | 2026-10-13 | [Toward RL on mixed-precision, mixed-accelerator samplers](https://modal.com/blog/toward-rl-on-mixed-precision-mixed-accelerator-samplers) | Modal（Nan Jiang） | 采样跑在 6 种卡上（B200/B300 用 NVFP4，H100/H200 用 FP8 和 BF16，A100/RTX PRO 6000 用 BF16），喂给一个 B200 BF16 trainer，全异步、不限陈旧度；Qwen3.6-35B-A3B 做 256K 上下文 agentic coding。不加修正的 GRPO 必崩，单加 MIS、SC 或 top-p 只能推迟；SC＋MIS（可加 top-p mask replay）才稳定。训推 KL 是同构采样的 4.7 倍，SWE-bench Pro V2 仍持平，采样成本约低 15%。观点：稳定性取决于失配是否持续增长，而非大小。 |
 | 2026-10-08 | [TRL v1.15.0](https://github.com/huggingface/trl/releases/tag/v1.15.0) | Hugging Face TRL | fused LM head 默认开启，8k 下峰值显存降 52–82%，GRPO 最大长度 29k→115k；AsyncGRPO 接入 OpenEnv。 |
 | 2026-10-08 | [TermGrade](https://aiand.com/newsroom/termgrade) | ai& | 1,004 个可执行终端 RL 环境＋3.6 万条带打分轨迹＋逐模型通过率；gemma-4-31B-it GRPO 后 TB2.1 43.0→45.1；二元奖励好于按测试给部分分。 |
+| 2025-08-05 | [Your Efficient RL Framework Secretly Brings You Off-Policy RL Training](https://fengyao.notion.site/off-policy-rl) | Feng Yao, Liyuan Liu 等（博客） | 在 verl 这类框架里，rollout（vLLM）和训练（FSDP）用不同实现，这种差异让名义上的 on-policy RL 实际变成 off-policy；提出截断重要性采样（TIS）来修正，后来成为各框架的常用选项。 |
 
 ### Reward hack 与安全报告
 
@@ -59,6 +62,29 @@
 ## 论文
 
 链接均为 arXiv 摘要页，标题和首发日期已用 arXiv API 逐篇核对。
+
+### RLHF 与偏好优化
+
+| 发布时间 | 论文 | 机构 / 作者 | 要点 |
+|-|-|-|-|
+| 2023-05-31 | [Let's Verify Step by Step](https://arxiv.org/abs/2305.20050) | OpenAI | 对比结果监督和过程监督：过程监督训练的奖励模型（PRM）在 MATH 代表性子集上解出 78% 的题；同时发布 80 万条步级人工标注 PRM800K。 |
+| 2023-05-29 | [Direct Preference Optimization (DPO)](https://arxiv.org/abs/2305.18290) | Stanford | 把带 KL 约束的 RLHF 目标改写成偏好数据上的分类损失，不需要显式奖励模型，也不需要 RL 采样；效果与 PPO 式 RLHF 相当或更好，此后出现大量变体。 |
+| 2022-03-04 | [Training language models to follow instructions with human feedback (InstructGPT)](https://arxiv.org/abs/2203.02155) | OpenAI | 确立 SFT → 奖励模型 → PPO 的三段式 RLHF；人工评估中 1.3B 的 InstructGPT 优于 175B 的 GPT-3。 |
+| 2017-07-20 | [Proximal Policy Optimization Algorithms (PPO)](https://arxiv.org/abs/1707.06347) | OpenAI | 用裁剪后的代理目标，让每批数据可以做多轮 minibatch 更新；比 TRPO 实现简单、样本效率更好，是后来 LLM 上各种策略优化算法的基底。 |
+| 2017-06-12 | [Deep reinforcement learning from human preferences](https://arxiv.org/abs/1706.03741) | OpenAI, DeepMind | RLHF 的起点：用人对轨迹片段的成对偏好训练奖励模型，再用 RL 优化；在 Atari 和 MuJoCo 上只需对不到 1% 的交互给反馈，就能学会复杂行为。 |
+
+### 推理 RL（RLVR）
+
+| 发布时间 | 论文 | 机构 / 作者 | 要点 |
+|-|-|-|-|
+| 2025-10-15 | [The Art of Scaling Reinforcement Learning Compute for LLMs (ScaleRL)](https://arxiv.org/abs/2510.13786) | Meta, UT Austin 等 | 超过 40 万 GPU 小时的系统研究：用 S 形的算力-性能曲线拟合 RL 扩展，能从小规模实验预测大规模结果；给出最佳实践配方 ScaleRL，并在单次 10 万 GPU 小时的训练中验证。 |
+| 2025-07-24 | [Group Sequence Policy Optimization (GSPO)](https://arxiv.org/abs/2507.18071) | Qwen Team, Alibaba | 在序列级定义重要性比率并做序列级裁剪和优化，而不是 token 级；比 GRPO 更稳定、更高效，尤其稳住了 MoE 的 RL 训练，已用于 Qwen3。 |
+| 2025-04-18 | [Does Reinforcement Learning Really Incentivize Reasoning Capacity in LLMs Beyond the Base Model?](https://arxiv.org/abs/2504.13837) | Tsinghua, SJTU | 用大 k 的 pass@k 衡量能力边界：RLVR 提高了小 k 时的采样效率，但 k 很大时基座模型反而更高，RL 模型的推理路径大多已在基座分布里；蒸馏才真正引入新能力。引出了大量后续讨论。 |
+| 2025-03-18 | [DAPO: An Open-Source LLM Reinforcement Learning System at Scale](https://arxiv.org/abs/2503.14476) | ByteDance Seed, Tsinghua AIR 等 | 提出 Clip-Higher、动态采样、token 级策略梯度损失、超长奖励塑形四项技术；Qwen2.5-32B 上 AIME 2024 得 50 分，训练步数只有 DeepSeek-R1-Zero-Qwen-32B 的一半；基于 verl 开源，后来几乎成了默认做法。 |
+| 2025-01-22 | [DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning](https://arxiv.org/abs/2501.12948) | DeepSeek-AI | R1-Zero 不经 SFT、只用大规模 RL，就涌现出自我验证、反思和长思维链；R1 加入冷启动数据和多阶段训练，推理能力与 OpenAI o1-1217 相当；模型开源并蒸馏出多个小模型。这一轮推理 RL 热潮的起点。 |
+| 2025-01-22 | [Kimi k1.5: Scaling Reinforcement Learning with LLMs](https://arxiv.org/abs/2501.12599) | Moonshot AI（Kimi Team） | 与 R1 同日发布的长思维链 RL 配方：把 RL 上下文扩到 128K、改进策略优化，不用 MCTS、价值函数和过程奖励模型；long2short 方法提升短思维链表现；数学和代码上追平 o1。 |
+| 2024-11-22 | [Tülu 3: Pushing Frontiers in Open Language Model Post-Training](https://arxiv.org/abs/2411.15124) | Ai2, UW | 完全开放的后训练配方（SFT、DPO、RLVR），提出 RLVR 这个说法，即用可验证奖励做 RL；数据、代码、训练配方和评测全部公开。 |
+| 2024-02-05 | [DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models](https://arxiv.org/abs/2402.03300) | DeepSeek-AI, Tsinghua, PKU | 提出 GRPO：用组内平均奖励做基线来代替 critic，省掉价值模型的显存；7B 数学模型在 MATH 上得 51.7%（不用工具和投票）。 |
 
 ### 长程 agent 的 credit assignment
 
@@ -115,6 +141,7 @@
 | 2026-10-15 | [ReFlow](https://arxiv.org/abs/2610.21640) | HKU, USTC, Alibaba | 回放驱动的解耦式 RL，吞吐比同步和异步系统最高 2.06×。 |
 | 2026-10-09 | [S³R](https://arxiv.org/abs/2610.13202) |  | 自稀疏投机解码 rollout，采样分布不偏；端到端 1.35–1.39×。 |
 | 2026-09-19 | [FlashREINFORCE（v2 于 2026-11-18）](https://arxiv.org/abs/2611.18627) | NVIDIA | 不用 critic、每个 prompt 一条 rollout 的异步 agent RL；1.5B 比 GRPO 高 1.7 且 rollout 减半，30B-A3B 在 policy lag 为 8 时仍稳定。 |
+| 2026-09-19 | [DeepSeek Elastic Compute (DSec)](https://arxiv.org/abs/2609.22978) | DeepSeek-AI | agentic 训练用的生产级沙箱平台：统一 SDK 覆盖 FnCall、容器、microVM 和完整 VM；与 RL 框架协同设计，把有状态的 rollout 执行和可抢占的 GPU 训练解耦，并处理 reward hacking 等 agent 越界行为。单个单元约 160 节点、每天约 300 万个沙箱，生产中超过 38 万个并发沙箱、每秒 5,000 多次创建。 |
 
 ### on-policy 蒸馏、合并与权重
 
